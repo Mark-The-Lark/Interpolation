@@ -18,7 +18,7 @@ class windowApp(CTk, TkinterDnD.DnDWrapper):
         super().__init__(*args,**kwargs)
         #sharedData
         self.dataVar = 'no file is present'
-        self.points = []
+        self.points = [] 
         self.values = []
 
         #WindowOptions
@@ -58,8 +58,8 @@ class windowApp(CTk, TkinterDnD.DnDWrapper):
         self.label = CTkLabel(self, text= "Enter a csv file with data", width= 180, height= 50)
 
         #CheckBoxes
-        self.LagrangeCheck = CTkCheckBox(self,text="draw Lagrange polynoms", variable=self.check_var1, onvalue=1, offvalue=0)
-        self.SplineCheck = CTkCheckBox(self,text="draw Splines polynoms", variable=self.check_var2, onvalue=1, offvalue=0)
+        self.LagrangeCheck = CTkCheckBox(self,text="draw Lagrange polynoms", variable=self.check_var1, onvalue=1, offvalue=0, width = 180, height=50 )
+        self.SplineCheck = CTkCheckBox(self,text="draw Splines polynoms", variable=self.check_var2, onvalue=1, offvalue=0, width=180, height=50)
 
         #Frames
         self.frame = dataFrame(master=self)
@@ -110,17 +110,17 @@ class windowApp(CTk, TkinterDnD.DnDWrapper):
         self.inter.get_tk_widget().pack_forget()
         self.inter = Interpolation(master = self.spec,points= self.points,values= self.values, height = 500)
 
-        self.frame.grid(sticky = 'nsew')
+        self.frame.grid(sticky = 'nsew', columnspan=2,)
         self.inter.get_tk_widget().pack()
-        self.spec.grid(sticky='nsew')
+        self.spec.grid(sticky='nsew',column=2,row=0, rowspan=5)
 
         self.inter.config()
 
-        self.inputButton.grid(sticky = 'nsew')
-        self.LagrangeCheck.grid(sticky = 'nsew')
-        self.SplineCheck.grid(sticky = 'nsew')
-        self.drawButton.grid(sticky = 'nsew')
-        self.clearButton.grid(sticky = 'nsew')
+        self.inputButton.grid(sticky = 'nsew', columnspan=2, row=1)
+        self.LagrangeCheck.grid(sticky = 'nsew', column=1, row=2 )
+        self.SplineCheck.grid(sticky = 'nsew', row=2)
+        self.drawButton.grid(sticky = 'nsew', columnspan=2, row=3)
+        self.clearButton.grid(sticky = 'nsew', columnspan=2, row=4)
 
     def hideData(self) -> None:
         self.frame.grid_remove()
@@ -233,7 +233,7 @@ class Interpolation(FigureCanvasTkAgg):
         
     def __init__(self, master:CTk ,points:np.array, values:np.array, *args,**kwargs) -> FigureCanvasTkAgg:
         #SharedData
-        self.fig = plt.Figure(figsize=(10, 8))
+        self.fig = plt.Figure(figsize=(14, 11))
         self.points = points
         self.values = values
         super().__init__(self.fig, master)
