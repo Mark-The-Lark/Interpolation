@@ -6,18 +6,22 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolb
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy.polynomial.polynomial as polynom
+import os
 
 #prebuiltSettings
 matplotlib.use('TkAgg')
 set_appearance_mode("system")
 set_default_color_theme("blue")
-
+os.chdir('C:/buffer')
 #mainClass
 class windowApp(CTk, TkinterDnD.DnDWrapper):
     def __init__(self, size:str, *args,**kwargs)  -> CTk:
         super().__init__(*args,**kwargs)
         #sharedData
-        self.dataVar = 'no file is present'
+        
+        self.file = open('text.txt', 'r', encoding='utf-8')
+        self.dataVar = self.file.read()
+        self.file.close()
         self.points = [] 
         self.values = []
 
@@ -25,9 +29,10 @@ class windowApp(CTk, TkinterDnD.DnDWrapper):
         self.Tkdndversion = TkinterDnD._require(self)
         self.title("Interpolation program")
         self.geometry(size)
-        for i in range(10):
+        for i in range(3):
             self.rowconfigure(i, weight= 1)
             self.columnconfigure(i, weight= 1)
+        self.rowconfigure(3, weight=1)
 
         #QuitScenario
         self.protocol("WM_DELETE_WINDOW", quit)
@@ -38,14 +43,11 @@ class windowApp(CTk, TkinterDnD.DnDWrapper):
         self.mainloop()
     #Widgets
     def createButtons(self) -> None:
-        self.upbutton = CTkButton(self, text= "drop file here", command= self.loadfile, width = 180, height= 50)
-        self.filebutton = CTkButton(self, text= "or open file dialog", command= self.filedialog, width = 180, height= 50)
-        self.inputButton = CTkButton(self, text= "select other file", command= self.showInput, width = 180, height= 50)
-        self.drawButton = CTkButton(self, text="draw graph", command=self.draw, width=180, height=50)
-        self.clearButton = CTkButton(self, text = 'clear', command=self.clear, width=180, height=50)
-
-        self.upbutton.drop_target_register(DND_ALL)
-        self.upbutton.dnd_bind('<<Drop>>', self.uploadfile)
+        self.upbutton = CTkButton(self, text= "load file", command= self.loadfile, width = 600, height= 150)
+        self.filebutton = CTkButton(self, text= "or open file dialog", command= self.filedialog, width = 600, height= 150)
+        self.inputButton = CTkButton(self, text= "select other file", command= self.showInput, width = 100, height= 100)
+        self.drawButton = CTkButton(self, text="draw graph", command=self.draw, width=100, height=100)
+        self.clearButton = CTkButton(self, text = 'clear', command=self.clear, width=100, height=100)
     
     def createWidgets(self) -> None:
         self.check_var1 = StringVar(value=0)
@@ -55,15 +57,17 @@ class windowApp(CTk, TkinterDnD.DnDWrapper):
         self.createButtons()
 
         #Labels
-        self.label = CTkLabel(self, text= "Enter a csv file with data", width= 180, height= 50)
+        self.label = CTkLabel(self, text= "Drop or choose a file", width= 600, height= 100)
 
+        self.label.drop_target_register(DND_ALL)
+        self.label.dnd_bind('<<Drop>>', self.uploadfile)
         #CheckBoxes
-        self.LagrangeCheck = CTkCheckBox(self,text="draw Lagrange polynoms", variable=self.check_var1, onvalue=1, offvalue=0, width = 180, height=50 )
-        self.SplineCheck = CTkCheckBox(self,text="draw Splines polynoms", variable=self.check_var2, onvalue=1, offvalue=0, width=180, height=50)
+        self.LagrangeCheck = CTkCheckBox(self,text="draw Lagrange polynoms", variable=self.check_var1, onvalue=1, offvalue=0, width = 100, height=100 )
+        self.SplineCheck = CTkCheckBox(self,text="draw Splines polynoms", variable=self.check_var2, onvalue=1, offvalue=0, width=100, height=100)
 
         #Frames
         self.frame = dataFrame(master=self)
-        self.spec = CTkFrame(master= self, height=200,width=300)
+        self.spec = CTkFrame(master= self, height=400,width=400)
         self.inter = Interpolation(self.spec, [],[])
         self.inter.get_tk_widget().pack()
 
@@ -74,9 +78,9 @@ class windowApp(CTk, TkinterDnD.DnDWrapper):
             self.hideData()
         except:
             pass
-        self.label.grid(sticky = 'nsew')
-        self.upbutton.grid(sticky = 'nsew')
-        self.filebutton.grid(sticky = 'nsew')
+        self.label.grid(sticky = 'nsew', columnspan = 3)
+        self.upbutton.grid(sticky = 'nsew', columnspan = 3)
+        self.filebutton.grid(sticky = 'nsew', columnspan = 3)
 
     def hideInput(self) -> None:
         self.label.grid_remove()
@@ -93,6 +97,11 @@ class windowApp(CTk, TkinterDnD.DnDWrapper):
         self.label.configure(text= str(self.dataVar).split('/')[-1]+' click to read')
 
     def loadfile(self) -> None:
+        self.file = open('text.txt', 'w',encoding='utf-8')
+        self.file.seek(0)
+        self.file.write(str(self.dataVar))
+        self.file.close()
+        print('Записано')
         try:
             data = pd.read_csv(self.dataVar, sep= ';', dtype= np.double)
             self.points, self.values = np.round(data.to_numpy().transpose(),6)
@@ -106,21 +115,21 @@ class windowApp(CTk, TkinterDnD.DnDWrapper):
     def showData(self) -> None:  
 
         #Data
-        self.frame = dataFrame(array =[self.points, self.values],master = self, height = 500, width=200)
+        self.frame = dataFrame(array =[self.points, self.values],master = self, height = 300, width=100)
         self.inter.get_tk_widget().pack_forget()
-        self.inter = Interpolation(master = self.spec,points= self.points,values= self.values, height = 500)
+        self.inter = Interpolation(master = self.spec,points= self.points,values= self.values)
 
-        self.frame.grid(sticky = 'nsew', columnspan=2,)
+        self.frame.grid(sticky = 'nsew', rowspan=3, column = 0, row = 0)
         self.inter.get_tk_widget().pack()
-        self.spec.grid(sticky='nsew',column=2,row=0, rowspan=5)
+        self.spec.grid(sticky='nsew',column=1,row=0, rowspan=4)
 
         self.inter.config()
 
-        self.inputButton.grid(sticky = 'nsew', columnspan=2, row=1)
-        self.LagrangeCheck.grid(sticky = 'nsew', column=1, row=2 )
-        self.SplineCheck.grid(sticky = 'nsew', row=2)
-        self.drawButton.grid(sticky = 'nsew', columnspan=2, row=3)
-        self.clearButton.grid(sticky = 'nsew', columnspan=2, row=4)
+        self.inputButton.grid(sticky = 'nsew', row=3)
+        self.LagrangeCheck.grid(sticky = 'nsew', column=2, row=0)
+        self.SplineCheck.grid(sticky = 'nsew', column = 2, row=1)
+        self.drawButton.grid(sticky = 'nsew',column = 2, row=2)
+        self.clearButton.grid(sticky = 'nsew', column=2, row=3)
 
     def hideData(self) -> None:
         self.frame.grid_remove()
@@ -213,7 +222,7 @@ class dataFrame(CTkScrollableFrame):
               for i, proc in enumerate(x):
                 self.app_frame = CTkFrame(
                     master=self,
-                    width=100,
+                    width=50,
                     height=50,
                     corner_radius=3,
                     border_width=0,
@@ -233,7 +242,7 @@ class Interpolation(FigureCanvasTkAgg):
         
     def __init__(self, master:CTk ,points:np.array, values:np.array, *args,**kwargs) -> FigureCanvasTkAgg:
         #SharedData
-        self.fig = plt.Figure(figsize=(14, 11))
+        self.fig = plt.Figure(figsize=(15, 15))
         self.points = points
         self.values = values
         super().__init__(self.fig, master)
