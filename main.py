@@ -78,9 +78,9 @@ class windowApp(CTk, TkinterDnD.DnDWrapper):
             self.hideData()
         except:
             pass
-        self.label.grid(sticky = 'nsew', columnspan = 3)
-        self.upbutton.grid(sticky = 'nsew', columnspan = 3)
-        self.filebutton.grid(sticky = 'nsew', columnspan = 3)
+        self.label.grid(sticky = 'nsew', column=1, rowspan = 2)
+        self.upbutton.grid(sticky = 'nsew', column=1)
+        self.filebutton.grid(sticky = 'nsew', column=1)
 
     def hideInput(self) -> None:
         self.label.grid_remove()
